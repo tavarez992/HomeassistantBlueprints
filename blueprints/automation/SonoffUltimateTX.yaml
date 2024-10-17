@@ -1,0 +1,229 @@
+blueprint:
+  name: Sonoff Ultimate TX automation Blueprint
+  description: >-
+    Sonoff Ultimate TX blueprint for "two fingers double click" gesture and "two fingers + slide action"
+
+    Blueprint use Sonoff LAN HACS integration - https://github.com/AlexxIT/SonoffLAN
+
+    Need to manualy crete text helper for last state
+  domain: automation
+  author: Shadala
+  source_url: https://github.com/tavarez992/HomeassistantBlueprints/blob/main/blueprints/automation/SonoffUltimateTX.yaml
+  input:
+    entities_section:
+      name: Entities
+      icon: mdi:television-shimme
+      input:
+        controller_ambient:
+          name: (Required) Ambient light entity
+          description: Ambient
+          selector:
+            entity:
+              domain:
+                - light
+        controller_entity:
+          name: (Required) Entity with slide actions
+          description: Slide
+          selector:
+            entity:
+              domain:
+                - sensor
+        helper_last_controller_event:
+          name: (Required) Helper - Last Event
+          description: Input Text used to store the last event.
+            You will need to manually create a text input entity for this.
+          selector:
+            entity:
+              domain:
+                - input_text
+    actions_section:
+      name: Actions
+      icon: mdi:gesture-tap-button
+      input:
+        action_single_actions_slide_1:
+          name: Single slide left
+          description: Slide left
+          default: []
+          selector:
+            action: {}
+        action_single_actions_slide_2:
+          name: Single slide right
+          description: Slide right
+          default: []
+          selector:
+            action: {}
+        action_double_actions_double_ambient_click:
+          name: Double click with two fingers
+          description: Two times click with two fingers gesture
+          default: []
+          selector:
+            action: {}
+        action_double_actions_slide_1:
+          name: Slide left after two fingers
+          description: Two fingers gesture then slide left
+          default: []
+          selector:
+            action: {}
+        action_double_actions_slide_2:
+          name: Slide right after two fingers
+          description: Two fingers gesture then slide right
+          default: []
+          selector:
+            action: {}
+    helpers_section:
+      name: Helpers
+      icon: mdi:application-variable
+      collapsed: true
+      input:
+        helper_double_press_delay:
+          name: (Optional) Helper - Double Press delay
+          description: Max delay between the first and the second DOUBLE events.
+          default: 1000
+          selector:
+            number:
+              min: 100.0
+              max: 5000.0
+              unit_of_measurement: milliseconds
+              mode: box
+              step: 10.0
+mode: restart
+triggers:
+  - trigger: state
+    entity_id:
+      - !input controller_ambient
+    id: slide_left_id
+  - trigger: state
+    entity_id:
+      - !input controller_entity
+    to: slide_1
+    id: slide_left_id
+  - trigger: state
+    entity_id:
+      - !input controller_entity
+    to: slide_2
+    id: slide_right_id
+conditions:
+  - condition: template
+    value_template: |-
+      {%- set trigger_action_if -%} 
+      {{ trigger.to_state.state }}
+      {%- endset -%} 
+      {{ trigger_action_if in ["on","off","slide_1","slide_2"] }}
+    enabled: true
+action:
+  - variables:
+      helper_last_controller_event: !input helper_last_controller_event
+      helper_double_press_delay: !input helper_double_press_delay
+      trigger_action: "{{ trigger.to_state.state }}"
+      trigger_delta: >-
+        {{ (as_timestamp(now()) - ((states(helper_last_controller_event) 
+        | from_json).t if states(helper_last_controller_event) not in
+        [None, ''] else as_timestamp("1970-01-01 00:00:00"))) * 1000 }}
+      last_controller_event: >-
+        {{ (states(helper_last_controller_event) | from_json).a if
+        states(helper_last_controller_event) not in [None, ''] else "" }}
+      time_to_do_double: >-
+        {{trigger_delta | int <= helper_double_press_delay | int and
+        last_controller_event in ['on','off']}}
+  - action: input_text.set_value
+    metadata: {}
+    data:
+      value: "{{ {'a':trigger_action,'t':as_timestamp(now())} | to_json }}"
+    target:
+      entity_id: !input helper_last_controller_event
+  - if:
+      - condition: template
+        value_template: "{{time_to_do_double}}"
+    then:
+      - alias: Double events
+        choose:
+          - conditions:
+              - condition: template
+                value_template: "{{trigger_action == 'slide_1'}}"
+            sequence:
+              - sequence:
+                  - action: input_text.set_value
+                    metadata: {}
+                    data:
+                      value: >-
+                        {{ {'a':'do_second_left','t':as_timestamp(now())} | to_json }}
+                    target:
+                      entity_id: !input helper_last_controller_event
+                  - choose:
+                      - conditions: []
+                        sequence: !input action_double_actions_slide_1
+            alias: Double slide left
+          - conditions:
+              - condition: template
+                value_template: "{{trigger_action == 'slide_2'}}"
+            sequence:
+              - sequence:
+                  - action: input_text.set_value
+                    metadata: {}
+                    data:
+                      value: >-
+                        {{ {'a':'do_second_right','t':as_timestamp(now())} | to_json }}
+                    target:
+                      entity_id: !input helper_last_controller_event
+                  - choose:
+                      - conditions: []
+                        sequence: !input action_double_actions_slide_2
+            alias: Double slide right
+          - conditions:
+              - condition: template
+                value_template: "{{trigger_action in ['on', 'off']}}"
+            sequence:
+              - sequence:
+                  - action: input_text.set_value
+                    metadata: {}
+                    data:
+                      value: >-
+                        {{ {'a':'double_ambient_click','t':as_timestamp(now())}
+                        | to_json }}
+                    target:
+                      entity_id: !input helper_last_controller_event
+                  - choose:
+                      - conditions: []
+                        sequence: !input action_double_actions_double_ambient_click
+            alias: Double ambient
+    else:
+      - if:
+          - condition: template
+            value_template: "{{ trigger_action in ['on','off'] }}"
+        then:
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 0
+              milliseconds: "{{helper_double_press_delay}}"
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{trigger_action == 'slide_1'}}"
+            sequence:
+              - action: input_text.set_value
+                metadata: {}
+                data:
+                  value: >-
+                    {{ {'a':'do_single_left','t':as_timestamp(now())} | to_json }}
+                target:
+                  entity_id: !input helper_last_controller_event
+              - choose:
+                  - conditions: []
+                    sequence: !input action_single_actions_slide_1
+            alias: Single slide left
+          - conditions:
+              - condition: template
+                value_template: "{{trigger_action == 'slide_2'}}"
+            sequence:
+              - action: input_text.set_value
+                metadata: {}
+                data:
+                  value: >-
+                    {{ {'a':'do_single_right','t':as_timestamp(now())} | to_json }}
+                target:
+                  entity_id: !input helper_last_controller_event
+              - choose:
+                  - conditions: []
+                    sequence: !input action_single_actions_slide_2
+            alias: Single events
