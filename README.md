@@ -21,3 +21,8 @@ Blueprint create extra 3 actions for Sonoff Ultimate TX Wall Switch. In one auto
 - two finger click -> slide right
 
 Blueprint use entities provided by Sonoff LAN HACS integration - https://github.com/AlexxIT/SonoffLAN
+
+This is how Blueprint looks:
+
+<img src="https://github.com/user-attachments/assets/8b7b3186-b76f-423f-97b4-e5338f278d7f" alt="image" width="200" />
+
