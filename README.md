@@ -8,6 +8,11 @@
 
 [![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Ftavarez992%2FHomeassistantBlueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2FSonoffUltimateTX.yaml)
 
+You need to define 3 entities in Blueprint config:
+- entity with ambient light
+- entity with slide actions
+- text helper (*need to manualy create text helper*) as a support string used in Blueprint. It will contain JSON string for getting last event and last event time.
+
 Blueprint create extra 3 actions for Sonoff Ultimate TX Wall Switch. In one automation you can define 5 actions:
 - slide left
 - slide right
@@ -16,5 +21,3 @@ Blueprint create extra 3 actions for Sonoff Ultimate TX Wall Switch. In one auto
 - two finger click -> slide right
 
 Blueprint use entities provided by Sonoff LAN HACS integration - https://github.com/AlexxIT/SonoffLAN
-
-Need to manualy create text helper for last state (it will contain json string of last action and timestamp)
