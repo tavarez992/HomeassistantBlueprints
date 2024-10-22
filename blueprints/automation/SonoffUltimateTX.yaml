@@ -87,6 +87,7 @@ blueprint:
               mode: box
               step: 10.0
 mode: restart
+max_exceeded: silent
 triggers:
   - trigger: state
     entity_id:
