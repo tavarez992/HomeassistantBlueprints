@@ -12,7 +12,7 @@ blueprint:
   input:
     entities_section:
       name: Entities
-      icon: mdi:television-shimme
+      icon: mdi:cellphone-link
       input:
         controller_ambient:
           name: (Required) Ambient light entity
