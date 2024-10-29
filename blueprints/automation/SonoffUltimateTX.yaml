@@ -92,30 +92,27 @@ triggers:
   - trigger: state
     entity_id:
       - !input controller_ambient
-    id: slide_left_id
   - trigger: state
     entity_id:
       - !input controller_entity
     to: slide_1
-    id: slide_left_id
   - trigger: state
     entity_id:
       - !input controller_entity
     to: slide_2
-    id: slide_right_id
 conditions:
   - condition: template
     value_template: |-
       {%- set trigger_action_if -%} 
       {{ trigger.to_state.state }}
       {%- endset -%} 
-      {{ trigger_action_if in ["on","off","slide_1","slide_2"] }}
+      {{ trigger_action_if in ['on','off','slide_1','slide_2'] }}
     enabled: true
 action:
   - variables:
       helper_last_controller_event: !input helper_last_controller_event
       helper_double_press_delay: !input helper_double_press_delay
-      trigger_action: "{{ trigger.to_state.state }}"
+      trigger_action: '{{ trigger.to_state.state }}'
       trigger_delta:
         '{{ (as_timestamp(now()) - ((states(helper_last_controller_event)
         | from_json).t if helper_last_controller_event is not none and (states(helper_last_controller_event)
