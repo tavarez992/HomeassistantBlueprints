@@ -152,6 +152,9 @@ action:
                   - choose:
                       - conditions: []
                         sequence: !input action_double_actions_slide_1
+                  - action: light.toggle
+                    target:
+                      entity_id: !input controller_ambient
             alias: Double slide left
           - conditions:
               - condition: template
@@ -168,6 +171,9 @@ action:
                   - choose:
                       - conditions: []
                         sequence: !input action_double_actions_slide_2
+                  - action: light.toggle
+                    target:
+                      entity_id: !input controller_ambient
             alias: Double slide right
           - conditions:
               - condition: template
