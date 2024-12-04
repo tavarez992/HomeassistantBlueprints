@@ -106,7 +106,7 @@ conditions:
       {%- set trigger_action_if -%} 
       {{ trigger.to_state.state }}
       {%- endset -%} 
-      {{ trigger_action_if in ['on','off','slide_1','slide_2'] }}
+      {{ trigger_action_if in ['on','off','slide_1','slide_2'] and trigger.to_state.context.parent_id is none }}
     enabled: true
 action:
   - variables:
