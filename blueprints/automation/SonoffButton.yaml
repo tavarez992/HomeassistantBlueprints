@@ -1,0 +1,77 @@
+blueprint:
+  name: Shadala - Sonoff Button
+  description: Sonoff SNZB-01 Zigbee Wireless Switch via Zigbee2MQTT.
+  domain: automation
+  input:
+    mode:
+      name: Automation Modes
+      description: https://www.home-assistant.io/docs/automation/modes/
+      default: parallel
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - single
+            - restart
+            - queued
+            - parallel
+          multiple: false
+          custom_value: false
+    switch:
+      selector:
+        device:
+          multiple: false
+      name: Button device
+    single_press:
+      name: Single Press
+      description: Action to run on single press
+      default: []
+      selector:
+        action: {}
+    double_press:
+      name: Double Press
+      description: Action to run on double press
+      default: []
+      selector:
+        action: {}
+    long_press:
+      name: Long Press
+      description: Action to run on long press (4 seconds)
+      default: []
+      selector:
+        action: {}
+  source_url: https://community.home-assistant.io/t/zigbee2mqtt-sonoff-wireless-switch-snzb-01-rdeangel-mod/663331
+mode: !input mode
+max_exceeded: silent
+triggers:
+  - domain: mqtt
+    device_id: !input switch
+    type: action
+    subtype: single
+    trigger: device
+  - domain: mqtt
+    device_id: !input switch
+    type: action
+    subtype: double
+    trigger: device
+  - domain: mqtt
+    device_id: !input switch
+    type: action
+    subtype: long
+    trigger: device
+#conditions:
+#  - condition: template
+#    value_template: "{{ trigger.payload is not None }}"
+action:
+  - variables:
+      command: "{{ trigger.payload }}"
+  - choose:
+      - conditions:
+          - "{{ command == 'single' }}"
+        sequence: !input single_press
+      - conditions:
+          - "{{ command == 'double' }}"
+        sequence: !input double_press
+      - conditions:
+          - "{{ command == 'long' }}"
+        sequence: !input long_press
