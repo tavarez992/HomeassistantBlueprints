@@ -174,9 +174,6 @@ and [Hooks](https://epmatt.github.io/awesome-ha-blueprints/docs/blueprints/hooks
 - **2026-10** – First version of the fork: upstream 2025.11.04 (commit
   [79b7c6b](https://github.com/EPMatt/awesome-ha-blueprints/commit/79b7c6b6)) with the inputs grouped into sections.
 
-The fork is generated from the upstream file by [`scripts/update_epmatt_forks.py`](scripts/update_epmatt_forks.py),
-so a new upstream version can be taken over without copying anything by hand.
-
 ---
 
 ## IKEA TRADFRI remote
@@ -219,8 +216,6 @@ and [Hooks](https://epmatt.github.io/awesome-ha-blueprints/docs/blueprints/hooks
 
 - **2026-10** – First version of the fork: upstream 2025.11.04 (commit
   [79b7c6b](https://github.com/EPMatt/awesome-ha-blueprints/commit/79b7c6b6)) with the inputs grouped into sections.
-
-Like the STYRBAR fork, it is generated from the upstream file by [`scripts/update_epmatt_forks.py`](scripts/update_epmatt_forks.py).
 
 ---
 
