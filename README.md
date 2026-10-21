@@ -10,6 +10,7 @@ Every change runs at home first and only then lands here.
 | [Sonoff TX Ultimate – slide and two-finger gestures](#sonoff-tx-ultimate) | SONOFF TX Ultimate (T5) touch wall switch | [SonoffLAN](https://github.com/AlexxIT/SonoffLAN) (HACS) in mode **auto** | [![Import blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Ftavarez992%2FHomeassistantBlueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2FSonoffUltimateTX.yaml) |
 | [Sonoff SNZB-01 button](#sonoff-snzb-01-button) | SONOFF SNZB-01 wireless button | Zigbee2MQTT | [![Import blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Ftavarez992%2FHomeassistantBlueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2FSonoffButton.yaml) |
 | [IKEA STYRBAR remote](#ikea-styrbar-remote) | IKEA STYRBAR remote (E2001/E2002) | Zigbee2MQTT, ZHA, deCONZ | [![Import blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Ftavarez992%2FHomeassistantBlueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2FIkeaStyrbar.yaml) |
+| [IKEA TRÅDFRI remote](#ikea-tradfri-remote) | IKEA TRÅDFRI remote control (E1524/E1810) | Zigbee2MQTT, ZHA, deCONZ | [![Import blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Ftavarez992%2FHomeassistantBlueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2FIkeaTradfriRemote.yaml) |
 
 All blueprints need **Home Assistant 2024.10** or newer.
 
@@ -173,16 +174,61 @@ and [Hooks](https://epmatt.github.io/awesome-ha-blueprints/docs/blueprints/hooks
 - **2026-10** – First version of the fork: upstream 2025.11.04 (commit
   [79b7c6b](https://github.com/EPMatt/awesome-ha-blueprints/commit/79b7c6b6)) with the inputs grouped into sections.
 
-The fork is generated from the upstream file by [`scripts/update_styrbar_fork.py`](scripts/update_styrbar_fork.py),
+The fork is generated from the upstream file by [`scripts/update_epmatt_forks.py`](scripts/update_epmatt_forks.py),
 so a new upstream version can be taken over without copying anything by hand.
+
+---
+
+## IKEA TRADFRI remote
+
+A fork of the [IKEA E1524/E1810 TRÅDFRI remote controller blueprint](https://github.com/EPMatt/awesome-ha-blueprints/blob/main/blueprints/controllers/ikea_e1524_e1810/ikea_e1524_e1810.yaml)
+by **[EPMatt](https://github.com/EPMatt)** from the **[Awesome HA Blueprints](https://epmatt.github.io/awesome-ha-blueprints)**
+project. All credit for the automation logic goes to EPMatt and the contributors of that project.
+
+**What the fork changes:** the 37 inputs are grouped into collapsible sections with icons and descriptions –
+**Remote**, one section per button (center, up, down, left, right) with all its settings and **Timing**.
+The automation logic is upstream version 2025.11.04 without changes, so the
+[upstream documentation](https://epmatt.github.io/awesome-ha-blueprints/docs/blueprints/controllers/ikea_e1524_e1810)
+and [Hooks](https://epmatt.github.io/awesome-ha-blueprints/docs/blueprints/hooks) apply as they are.
+
+<a href="images/ikea-tradfri-remote.png"><img src="images/ikea-tradfri-remote.png" alt="IKEA TRÅDFRI remote blueprint in Home Assistant" width="420"></a>
+
+*Click the picture to see it in full size.*
+
+### Requirements
+
+- The remote paired through Zigbee2MQTT, ZHA or deCONZ.
+- A **Text helper** for the last button event (*Settings → Devices & services → Helpers → Create helper →
+  Text*). It is needed for the double press and, with ZHA, for the release.
+
+### Setup
+
+1. Create the Text helper.
+2. Import the blueprint and create an automation from it.
+3. **Remote** – pick the integration, the remote and the helper.
+4. Open the section of a button and fill in its actions. To use a double press, first turn on
+   *Expose … double press event*. The short press then waits for the double-press window before it runs.
+   The center button has a short, double and long press, but no release.
+
+### Tips
+
+- The automation runs in `restart` mode and a button release restarts it too. Start long-running scripts
+  with `script.turn_on`, otherwise releasing the button stops a script you called directly.
+
+### Changelog
+
+- **2026-10** – First version of the fork: upstream 2025.11.04 (commit
+  [79b7c6b](https://github.com/EPMatt/awesome-ha-blueprints/commit/79b7c6b6)) with the inputs grouped into sections.
+
+Like the STYRBAR fork, it is generated from the upstream file by [`scripts/update_epmatt_forks.py`](scripts/update_epmatt_forks.py).
 
 ---
 
 ## License and credits
 
 - Licensed under [GPL-3.0](LICENSE).
-- IKEA STYRBAR: fork of [Awesome HA Blueprints](https://github.com/EPMatt/awesome-ha-blueprints) by EPMatt
-  and contributors, also GPL-3.0.
+- IKEA STYRBAR and TRÅDFRI remote: forks of [Awesome HA Blueprints](https://github.com/EPMatt/awesome-ha-blueprints)
+  by EPMatt and contributors, also GPL-3.0.
 - Sonoff SNZB-01: based on [rdeangel's blueprint](https://community.home-assistant.io/t/zigbee2mqtt-sonoff-wireless-switch-snzb-01-rdeangel-mod/663331).
 - Sonoff TX Ultimate entities come from [SonoffLAN](https://github.com/AlexxIT/SonoffLAN) by AlexxIT.
 
