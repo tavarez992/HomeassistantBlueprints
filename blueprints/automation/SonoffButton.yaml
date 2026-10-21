@@ -1,77 +1,116 @@
 blueprint:
-  name: Shadala - Sonoff Button
-  description: Sonoff SNZB-01 Zigbee Wireless Switch via Zigbee2MQTT.
+  name: Sonoff SNZB-01 button (Zigbee2MQTT)
+  # One line per paragraph: Home Assistant shows every line break in the description.
+  description: |
+    Run actions on a **single press**, **double press** and **long press** of the **SONOFF SNZB-01** wireless button paired with **Zigbee2MQTT**. The blueprint listens to the button's MQTT device triggers, so no action sensor is needed.
+
+    Based on [rdeangel's SNZB-01 blueprint](https://community.home-assistant.io/t/zigbee2mqtt-sonoff-wireless-switch-snzb-01-rdeangel-mod/663331).
+
+    [Documentation and changelog](https://github.com/tavarez992/HomeassistantBlueprints#sonoff-snzb-01-button)
   domain: automation
+  author: Shadala
+  source_url: https://github.com/tavarez992/HomeassistantBlueprints/blob/main/blueprints/automation/SonoffButton.yaml
+  homeassistant:
+    min_version: 2024.10.0
   input:
-    mode:
-      name: Automation Modes
-      description: https://www.home-assistant.io/docs/automation/modes/
-      default: parallel
-      selector:
-        select:
-          mode: dropdown
-          options:
-            - single
-            - restart
-            - queued
-            - parallel
-          multiple: false
-          custom_value: false
-    switch:
-      selector:
-        device:
-          multiple: false
-      name: Button device
-    single_press:
-      name: Single Press
-      description: Action to run on single press
-      default: []
-      selector:
-        action: {}
-    double_press:
-      name: Double Press
-      description: Action to run on double press
-      default: []
-      selector:
-        action: {}
-    long_press:
-      name: Long Press
-      description: Action to run on long press (4 seconds)
-      default: []
-      selector:
-        action: {}
-  source_url: https://community.home-assistant.io/t/zigbee2mqtt-sonoff-wireless-switch-snzb-01-rdeangel-mod/663331
+    button_section:
+      name: Button
+      icon: mdi:gesture-tap-button
+      description: The SNZB-01 as it appears in Home Assistant through Zigbee2MQTT.
+      input:
+        switch:
+          name: SNZB-01 button
+          description: The button device (MQTT integration, manufacturer SONOFF).
+          selector:
+            device:
+              filter:
+                - integration: mqtt
+                  manufacturer: SONOFF
+              multiple: false
+    actions_section:
+      name: Actions
+      icon: mdi:gesture-double-tap
+      description: What happens on each kind of press. Leave an action empty to ignore that press.
+      input:
+        single_press:
+          name: Single press
+          description: Press the button once.
+          default: []
+          selector:
+            action: {}
+        double_press:
+          name: Double press
+          description: Press the button twice quickly.
+          default: []
+          selector:
+            action: {}
+        long_press:
+          name: Long press
+          description: Press and hold the button.
+          default: []
+          selector:
+            action: {}
+    advanced_section:
+      name: Advanced
+      icon: mdi:cog-outline
+      collapsed: true
+      input:
+        mode:
+          name: Automation mode
+          description: >-
+            What happens when the button is pressed again while the previous action is still
+            running. See [automation modes](https://www.home-assistant.io/docs/automation/modes/).
+          default: parallel
+          selector:
+            select:
+              mode: dropdown
+              options:
+                - label: Parallel – start another run next to the running one
+                  value: parallel
+                - label: Single – ignore presses while an action is running
+                  value: single
+                - label: Restart – stop the running action and start again
+                  value: restart
+                - label: Queued – run the presses one after another
+                  value: queued
+
 mode: !input mode
 max_exceeded: silent
+
 triggers:
-  - domain: mqtt
+  - trigger: device
+    domain: mqtt
     device_id: !input switch
     type: action
     subtype: single
-    trigger: device
-  - domain: mqtt
+    id: single
+  - trigger: device
+    domain: mqtt
     device_id: !input switch
     type: action
     subtype: double
-    trigger: device
-  - domain: mqtt
+    id: double
+  - trigger: device
+    domain: mqtt
     device_id: !input switch
     type: action
     subtype: long
-    trigger: device
-#conditions:
-#  - condition: template
-#    value_template: "{{ trigger.payload is not None }}"
-action:
-  - variables:
-      command: "{{ trigger.payload }}"
+    id: long
+
+actions:
   - choose:
-      - conditions:
-          - "{{ command == 'single' }}"
+      - alias: Single press
+        conditions:
+          - condition: trigger
+            id: single
         sequence: !input single_press
-      - conditions:
-          - "{{ command == 'double' }}"
+      - alias: Double press
+        conditions:
+          - condition: trigger
+            id: double
         sequence: !input double_press
-      - conditions:
-          - "{{ command == 'long' }}"
+      - alias: Long press
+        conditions:
+          - condition: trigger
+            id: long
         sequence: !input long_press
